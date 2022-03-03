@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Writer</title>
+</head>
+<body>
+  <center><div class="textArea words" contenteditable></div></center>
+  <center><button onclick="copyText()">Copy</button></center>
+
+<script>
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recognition = new SpeechRecognition();
+  recognition.interimResults = true;
+
+  let t = document.createElement('textarea');
+  t.style.float = "left";
+  t.style.width = "100%";
+  // t.style.height = "50px";
+  t.style.resize = "none";
+
+  const words = document.querySelector('.words');
+  words.appendChild(t);
+
+  recognition.addEventListener('result', e => {
+    // console.log(e);
+    // console.log(e.results);
+
+    const transcript = Array.from(e.results)
+      .map(result => result[0])
+      .map(result => result.transcript) // Gives Array
+      .join('') // Join all the arrays into a single string
+
+      t.value = transcript;
+      t.setAttribute("id", "textArea");
+      console.log(transcript);
+      // words.innerHTML = transcript;
+
+      // if(e.results[0].isFinal){
+      //   p = document.createElement('input');
+      //   p.style.float = "left";
+      //   p.setAttribute("id", "text");
+      //   words.appendChild(p);
+      // }
+
+      if(e.results[0].isFinal){
+        console.log("End of a sentence.");
+        t.value += ' ';
+      }
+      // console.log(transcript);
+
+      // Extra functionalities
+
+      if(transcript.includes('copy')){
+        copyText();
+      }
+  });
+
+  recognition.addEventListener('end', recognition.start);
+
+  recognition.start();
+
+  // Function to copy text from the textarea
+  function copyText() {
+    // Get the text element
+    var copyText = document.getElementById("textArea");
+
+    // Select the text in the element
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); 
+
+    // Copy the text in the element to the clipboard.
+    navigator.clipboard.writeText(copyText.value);
+    
+    // Display a confirmation.
+    alert("Copied the text: " + copyText.value);
+  }
+// Bug: copy function doesn't work if you directly type something and copy it.
+
+</script>
+
+
+  <style>
+    html {
+      font-size: 10px;
+    }
+
+    body {
+      background: #ffc600;
+      font-weight: 200;
+      font-size: 20px;
+    }
+
+    .textArea{
+      margin-top: 400px;
+      width: 40%;
+      height: 30%;
+      border: 2px solid red;
+      background-color: green;
+    }
+  </style>
+</body>
+</html>
