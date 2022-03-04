@@ -1,104 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Writer</title>
-</head>
-<body>
-  <center><div class="textArea words" contenteditable></div></center>
-  <center><button onclick="copyText()">Copy</button></center>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3286/3286255.png" type="image/icon type">
+    <title>Writer</title>
+  </head>
+  <body>
+    <div class="total_div">
+      <center><div class="textArea words" contenteditable></div></center>
+      <center><div class="buttons_div">
+        <button class="button" onclick="copyText()">Copy</button>
+        <button class="button" onclick="startRecording()">Start Recording</button>
+        <button class="button" onclick="stopRecording()">Stop Recording</button>
+      </div></center>
+  </div>
 
-<script>
-  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  <script>
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  const recognition = new SpeechRecognition();
-  recognition.interimResults = true;
+    let recording = false;
 
-  let t = document.createElement('textarea');
-  t.style.float = "left";
-  t.style.width = "100%";
-  // t.style.height = "50px";
-  t.style.resize = "none";
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true;
 
-  const words = document.querySelector('.words');
-  words.appendChild(t);
+    let t = document.createElement('textarea');
+    t.setAttribute("placeholder", "The generated text will be displayed here.");
+    t.style.float = "left";
+    t.style.border = "none";
+    t.style.outlineStyle = "none";
+    t.style.marginLeft = "5%";
+    t.style.width = "90%";
+    t.style.height = "100%";
+    t.style.padding = "0px";
+    t.style.marginTop = "5px";
+    t.style.backgroundColor = "black";
+    t.style.color = "white";
+    t.style.fontSize = "18px";
+    t.style.resize = "none";
 
-  recognition.addEventListener('result', e => {
-    // console.log(e);
-    // console.log(e.results);
+    const words = document.querySelector('.words');
+    words.appendChild(t);
 
-    const transcript = Array.from(e.results)
-      .map(result => result[0])
-      .map(result => result.transcript) // Gives Array
-      .join('') // Join all the arrays into a single string
+    recognition.addEventListener('result', e => {
+      // console.log(e);
+      // console.log(e.results);
 
-      t.value = transcript;
-      t.setAttribute("id", "textArea");
-      console.log(transcript);
-      // words.innerHTML = transcript;
+      const transcript = Array.from(e.results)
+        .map(result => result[0])
+        .map(result => result.transcript) // Gives Array
+        .join('') // Join all the arrays into a single string
 
-      // if(e.results[0].isFinal){
-      //   p = document.createElement('input');
-      //   p.style.float = "left";
-      //   p.setAttribute("id", "text");
-      //   words.appendChild(p);
-      // }
+        t.value = transcript;
+        t.setAttribute("id", "textArea");
+        console.log(transcript);
 
-      if(e.results[0].isFinal){
-        console.log("End of a sentence.");
-        t.value += ' ';
+        if(e.results[0].isFinal){
+          console.log("End of a sentence.");
+          t.value += ' ';
+        }
+        // console.log(transcript);
+
+        // Extra functionalities
+
+        if(transcript.includes('copy')){
+          // The following line removes the word 'copy' from the copied text.
+          t.value = t.value.replace(/copy/gi, ''); // g -> Global, i -> case insensitive
+          copyText();
+        }
+    });
+
+    function startRecording() {
+      if(!recording){
+        recording = true;
+        recognition.start();
       }
-      // console.log(transcript);
-
-      // Extra functionalities
-
-      if(transcript.includes('copy')){
-        copyText();
+      else{
+        alert("Recognition happening.");
       }
-  });
-
-  recognition.addEventListener('end', recognition.start);
-
-  recognition.start();
-
-  // Function to copy text from the textarea
-  function copyText() {
-    // Get the text element
-    var copyText = document.getElementById("textArea");
-
-    // Select the text in the element
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); 
-
-    // Copy the text in the element to the clipboard.
-    navigator.clipboard.writeText(copyText.value);
-    
-    // Display a confirmation.
-    alert("Copied the text: " + copyText.value);
-  }
-// Bug: copy function doesn't work if you directly type something and copy it.
-
-</script>
-
-
-  <style>
-    html {
-      font-size: 10px;
     }
 
-    body {
-      background: #ffc600;
-      font-weight: 200;
-      font-size: 20px;
+    function stopRecording() {
+      if(recording){
+        recognition.stop();
+        recording = false;
+      }
+      else{
+        alert("There is nothing to stop recording.");
+      }
     }
 
-    .textArea{
-      margin-top: 400px;
-      width: 40%;
-      height: 30%;
-      border: 2px solid red;
-      background-color: green;
+    // recognition.addEventListener('end', recognition.start);
+    recognition.addEventListener('end', console.log("Recording stopped!"));
+
+    // Function to copy text from the textarea
+    function copyText() {
+      // Get the text element
+      var copyText = document.getElementById("textArea");
+
+      // Select the text in the element
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); 
+
+      if(copyText.value === ''){
+        alert("Nothing to copy!");
+      }
+
+      else{
+        // Copy the text in the element to the clipboard.
+        navigator.clipboard.writeText(copyText.value);
+        
+        // Display a confirmation.
+        alert("Copied the text: " + copyText.value);
+      }
     }
-  </style>
-</body>
+  // Bug: copy function doesn't work if you directly type something and copy it.
+
+  </script>
+
+    <style>
+      html {
+        font-size: 10px;
+      }
+
+      body {
+        background-color: #0F0E0E;
+        font-weight: 200;
+        font-size: 20px;
+      }
+
+      .textArea{
+        margin-top: 400px;
+        width: 40%;
+        height: 100px;
+        background-color: #04293A;
+        outline-style: none;
+        border-radius: 25px;
+        overflow: hidden;
+      }
+
+      .button{
+        background-color: #7A0BC0;
+        border: none;
+        align-content: space-between;
+        padding: 20px;
+        cursor: pointer;
+        margin-top: 30px;
+      }
+
+    </style>
+  </body>
 </html>
